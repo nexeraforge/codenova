@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile state, XP, coins, streak, and completion lists",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Customizable user display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Strict email address identifier"
+        },
+        "rank": {
+          "type": "string",
+          "description": "Current leaderboard tier league"
+        },
+        "streak": {
+          "type": "integer",
+          "description": "Active consecutive days learning count"
+        },
+        "coins": {
+          "type": "integer",
+          "description": "NovaCoins quantity available for making purchases"
+        },
+        "xp": {
+          "type": "integer",
+          "description": "Total accumulated experience points"
+        },
+        "completedLessons": {
+          "type": "object",
+          "description": "Language mapped chapter numbers completed in text"
+        },
+        "completedQuizzes": {
+          "type": "object",
+          "description": "Language mapped quizzes completed on correct answers"
+        },
+        "completedAssignments": {
+          "type": "object",
+          "description": "Language mapped hands-on code files processed"
+        },
+        "purchasedItems": {
+          "type": "array",
+          "description": "Unique identifiers of bought store options"
+        },
+        "unlockedBadges": {
+          "type": "array",
+          "description": "Badges earned on milestones"
+        },
+        "level": {
+          "type": "integer",
+          "description": "Overall calculated level based on 250XP thresholds"
+        },
+        "lastStreakUpdate": {
+          "type": "string",
+          "description": "ISO date string representing user action today"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "xp",
+        "coins"
+      ]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User accounts which contain gamified progress stats"
+    }
+  }
+}

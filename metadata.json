@@ -1,0 +1,6 @@
+{
+  "name": "CodeNova",
+  "description": "Learn coding like a game. A Duolingo-inspired full-stack gamified platform for learning Python and Java. Features vertical maps, code play areas, AI evaluation, quizzes, coins, streaks, and a live leaderboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
