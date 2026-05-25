@@ -13,7 +13,9 @@ import {
   HelpCircle, 
   Zap, 
   ArrowRight,
-  RefreshCw
+  RefreshCw,
+  Layers,
+  BookOpen
 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -81,7 +83,7 @@ export const Landing: React.FC = () => {
 
           {/* Dynamic Hero Headings */}
           <div className="space-y-5">
-            <h1 className="text-5xl md:text-6xl font-display font-black text-slate-950 tracking-tight leading-[1.05]">
+            <h1 className="text-5xl md:text-6xl font-display font-black text-slate-1500 tracking-tight leading-[1.05]">
               Learn coding <br />
               like a <span className="relative inline-block text-emerald-500">
                 game
@@ -89,7 +91,7 @@ export const Landing: React.FC = () => {
               </span>.
             </h1>
             <p className="text-slate-600 text-lg md:text-xl font-medium max-w-lg leading-relaxed font-sans mx-auto lg:mx-0">
-              Master <strong className="text-emerald-600 font-extrabold font-display">Python</strong> through bite-sized, gamified roadmaps. Learn
+              Master <strong className="text-emerald-700 font-extrabold font-display">Python</strong> through bite-sized, gamified roadmaps. Learn
               syntax, solve sandboxed code challenges, and get instant reviews from <strong className="text-amber-500 font-bold">Gemini AI</strong>!
             </p>
             <div className="pt-2 flex justify-center lg:justify-start">
@@ -118,25 +120,27 @@ export const Landing: React.FC = () => {
             </div>
           </div>
 
-          {/* Core App statistics Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0">
+          {/* Clean Redesigned 4-Column App statistics Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl mx-auto lg:mx-0">
             {[
               { 
-                label: "Bite Chapters", 
-                value: "65+", 
-                color: "text-emerald-700 bg-emerald-50 border-emerald-200/80 shadow-emerald-100",
-                icon: <Code2 className="w-5 h-5 text-emerald-600" />
+                label: "Units", 
+                value: "5", 
+                icon: <Layers className="w-5 h-5 text-emerald-600" />
+              },
+              { 
+                label: "Chapters", 
+                value: "30", 
+                icon: <BookOpen className="w-5 h-5 text-indigo-500" />
               },
               { 
                 label: "Interactive Quizzes", 
                 value: "600+", 
-                color: "text-blue-700 bg-blue-50 border-blue-200/80 shadow-blue-100",
                 icon: <HelpCircle className="w-5 h-5 text-blue-500" />
               },
               { 
                 label: "AI Evaluated", 
                 value: "Instant", 
-                color: "text-amber-700 bg-amber-50 border-amber-200/80 shadow-amber-100",
                 icon: <Zap className="w-5 h-5 text-amber-500" />
               }
             ].map((stat, i) => (
@@ -146,15 +150,15 @@ export const Landing: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
                 whileHover={{ y: -4, scale: 1.02 }}
-                className={`bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm text-center flex flex-col items-center justify-center relative overflow-hidden group`}
+                className="bg-white p-4.5 rounded-2xl border-2 border-slate-100 shadow-sm text-center flex flex-col items-center justify-center relative overflow-hidden group"
               >
                 {/* Decorative absolute element */}
                 <div className="absolute top-0 right-0 w-8 h-8 rounded-bl-full bg-slate-50 transition-colors group-hover:bg-slate-100" />
-                <div className="p-2.5 rounded-full mb-3 bg-slate-50">
+                <div className="p-2.5 rounded-full mb-2 bg-slate-100/50">
                   {stat.icon}
                 </div>
-                <p className="text-2xl font-display font-black text-slate-900 leading-none mb-1.5">{stat.value}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
+                <p className="text-xl sm:text-2xl font-display font-black text-slate-900 leading-none mb-1">{stat.value}</p>
+                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider leading-tight">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -164,23 +168,23 @@ export const Landing: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="relative flex flex-col sm:flex-row items-center gap-5 bg-white border-2 border-slate-100 rounded-3xl p-6 shadow-sm max-w-lg mx-auto lg:mx-0"
+            className="relative flex flex-col sm:flex-row items-center gap-5 bg-white border-2 border-slate-150/80 rounded-3xl p-6 shadow-sm max-w-lg mx-auto lg:mx-0"
           >
             <motion.div 
               animate={{ y: [0, -10, 0] }}
               transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-              className="text-5xl shrink-0 select-none animate-pulse"
+              className="text-5xl shrink-0 select-none"
             >
               🚀
             </motion.div>
-            <div className="relative bg-slate-50 border border-slate-200/60 p-4.5 rounded-2xl text-left w-full">
+            <div className="relative bg-slate-50 border border-slate-200/50 p-4 rounded-2xl text-left w-full">
               {/* Speech Bubble Arrow for desktop screens */}
-              <div className="hidden sm:block absolute top-[28px] -left-2 w-4.5 h-4.5 bg-slate-50 border-l border-b border-slate-200/60 rotate-45 transform" />
+              <div className="hidden sm:block absolute top-[28px] -left-2 w-4.5 h-4.5 bg-slate-50 border-l border-b border-slate-200/50 rotate-45 transform" />
               
               <p className="font-medium text-sm text-slate-700 leading-relaxed">
                 "Hi there! I am Nova, your AI Coach booster. Launch your active learning profile, earn NovaCoins, and let's compile loops high into orbit!"
               </p>
-              <div className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest mt-2 flex items-center gap-1.5">
+              <div className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest mt-2.5 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
                 <span>Coach Nova (Gemini Rocket Bot)</span>
               </div>

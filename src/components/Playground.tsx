@@ -184,6 +184,10 @@ export const Playground: React.FC<PlaygroundProps> = ({ chapter, activeElement, 
           inputs: collectedInputs
         })
       });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Server returned ${res.status}: ${text.slice(0, 150)}`);
+      }
       const data = await res.json();
       if (data.error) {
         setConsoleOutput(`> Error Compiled Failed:\n${data.error}`);
@@ -286,6 +290,11 @@ export const Playground: React.FC<PlaygroundProps> = ({ chapter, activeElement, 
           problemDescription: chapter.assignment.description + " Target Output: " + (chapter.assignment.goalDescription)
         })
       });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Server returned ${response.status}: ${text.slice(0, 150)}`);
+      }
 
       const report = await response.json();
       setGradeReport(report);

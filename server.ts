@@ -26,11 +26,10 @@ function getGeminiClient(): GoogleGenAI | null {
   return aiClient;
 }
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+const app = express();
+const PORT = 3000;
 
-  app.use(express.json());
+app.use(express.json());
 
   // API router health check
   app.get("/api/health", (req, res) => {
@@ -383,6 +382,9 @@ async function startServer() {
     }
   });
 
+export default app;
+
+async function bootstrap() {
   // Vite development middleware vs Static build files
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -398,9 +400,14 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`CodeNova full-stack server running on http://localhost:${PORT}`);
-  });
+  // Only start listening if NOT on Vercel environment (Vercel uses the serverless export directly)
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`CodeNova full-stack server running on http://localhost:${PORT}`);
+    });
+  }
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  bootstrap();
+}

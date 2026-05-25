@@ -184,54 +184,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let unsubscribe: (() => void) | undefined;
 
     if (isFirebaseActive && db && user) {
-      try {
-        const usersRef = collection(db, "users");
-        // Order by coins descending (with fallback/client sorting)
-        const q = query(usersRef, orderBy("coins", "desc"), limit(50));
-        
-        unsubscribe = onSnapshot(q, (snapshot) => {
-          const members: LeaderboardMember[] = [];
-          snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            members.push({
-              name: data.name || "Anonymous Coder",
-              avatar: data.avatar || "🧑‍🚀",
-              xp: typeof data.xp === "number" ? data.xp : 0,
-              coins: typeof data.coins === "number" ? data.coins : 0,
-              badge: data.unlockedBadges?.includes("solar_badge") ? "👑 Solar Master" : "🚀 CodeNovian",
-              rank: 0, // Placeholder mapping below
-              isCurrentUser: docSnap.id === auth?.currentUser?.uid
+      const subscribeToLeaderboard = (useOrderBy: boolean) => {
+        try {
+          const usersRef = collection(db, "users");
+          const q = useOrderBy 
+            ? query(usersRef, orderBy("coins", "desc"), limit(50))
+            : query(usersRef, limit(100)); // fallback without orderBy
+          
+          const unsub = onSnapshot(q, (snapshot) => {
+            const members: LeaderboardMember[] = [];
+            snapshot.forEach((docSnap) => {
+              const data = docSnap.data();
+              members.push({
+                name: data.name || "Anonymous Coder",
+                avatar: data.avatar || "🧑‍🚀",
+                xp: typeof data.xp === "number" ? data.xp : 0,
+                coins: typeof data.coins === "number" ? data.coins : 0,
+                badge: data.unlockedBadges?.includes("solar_badge") ? "👑 Solar Master" : "🚀 CodeNovian",
+                rank: 0, // Placeholder mapping below
+                isCurrentUser: docSnap.id === auth?.currentUser?.uid
+              });
             });
-          });
 
-          // Sort client-side by coins desc, and as secondary by xp desc
-          members.sort((a, b) => {
-            if (b.coins !== a.coins) {
-              return b.coins - a.coins;
+            // Sort client-side by coins desc, and as secondary by xp desc
+            members.sort((a, b) => {
+              if (b.coins !== a.coins) {
+                return b.coins - a.coins;
+              }
+              return b.xp - a.xp;
+            });
+
+            // Sort and assign real rank numbers
+            const sorted = members.map((item, index) => ({
+              ...item,
+              rank: index + 1
+            }));
+
+            setLeaderboard(sorted);
+          }, (error) => {
+            if (useOrderBy) {
+              console.warn("Leaderboard query failed with orderBy, falling back to unordered", error);
+              if (unsub) unsub();
+              subscribeToLeaderboard(false);
+            } else {
+              handleFirestoreError(error, OperationType.LIST, "users");
             }
-            return b.xp - a.xp;
           });
 
-          // Sort and assign real rank numbers
-          const sorted = members.map((item, index) => ({
-            ...item,
-            rank: index + 1
-          }));
-
-          setLeaderboard(sorted);
-        }, (error) => {
-          // Fallback client-side query search if composite index isn't constructed yet
-          if (error.code === "failed-precondition") {
-            console.warn("Index not built yet; sorting client-side only");
-            // Fetch unordered list and sort client-side
-            const unorderedQuery = query(usersRef, limit(50));
-            unorderedQuery; 
+          unsubscribe = unsub;
+        } catch (err) {
+          console.error("Firestore leaderboard subscription failed:", err);
+          if (useOrderBy) {
+            subscribeToLeaderboard(false);
           }
-          handleFirestoreError(error, OperationType.LIST, "users");
-        });
-      } catch (err) {
-        console.error("Firestore onSnapshot subscription failed:", err);
-      }
+        }
+      };
+
+      subscribeToLeaderboard(true);
     } else if (user) {
       // Local fallback compiler using only real registered local profiles
       const accountsKey = "codenova_local_accounts";
