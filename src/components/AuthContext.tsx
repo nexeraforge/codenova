@@ -99,6 +99,7 @@ const AVAILABLE_BADGES: Badge[] = [
   { id: "unstoppable", title: "Unstoppable", description: "Maintained a learning streak of 3 days or more.", icon: "🔥", color: "from-rose-400 to-orange-500" }
 ];
 
+
 const ensureValidProfile = (parsed: any): UserStats => {
   return {
     name: parsed?.name || "Guest Coder",
@@ -193,8 +194,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           const unsub = onSnapshot(q, (snapshot) => {
             const members: LeaderboardMember[] = [];
+            let currentUserSeen = false;
+
             snapshot.forEach((docSnap) => {
               const data = docSnap.data();
+              const isCurrentUser = docSnap.id === auth?.currentUser?.uid;
+              if (isCurrentUser) currentUserSeen = true;
+
               members.push({
                 name: data.name || "Anonymous Coder",
                 avatar: data.avatar || "🧑‍🚀",
@@ -202,9 +208,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 coins: typeof data.coins === "number" ? data.coins : 0,
                 badge: data.unlockedBadges?.includes("solar_badge") ? "👑 Solar Master" : "🚀 CodeNovian",
                 rank: 0, // Placeholder mapping below
-                isCurrentUser: docSnap.id === auth?.currentUser?.uid
+                isCurrentUser
               });
             });
+
+            // Ensure current user is in members list even if not in snapshot
+            if (!currentUserSeen && user) {
+              members.push({
+                name: user.name,
+                avatar: "🧑‍🚀",
+                xp: user.xp,
+                coins: user.coins,
+                badge: user.unlockedBadges?.includes("solar_badge") ? "👑 Solar Master" : "🚀 CodeNovian",
+                rank: 0,
+                isCurrentUser: true
+              });
+            }
+
+            // Showing real users only
 
             // Sort client-side by coins desc, and as secondary by xp desc
             members.sort((a, b) => {
@@ -252,12 +273,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const accounts = JSON.parse(accountsStr);
           Object.keys(accounts).forEach((email) => {
             const acc = accounts[email];
+            const cleanEmail = email.trim().toLowerCase();
+            const dataKey = `codenova_data_${cleanEmail}`;
+            const dataStr = localStorage.getItem(dataKey);
+            let detailed = acc;
+            if (dataStr) {
+              try {
+                detailed = JSON.parse(dataStr);
+              } catch (e) {}
+            }
             localMembers.push({
-              name: acc.name || "Local Coder",
+              name: detailed.name || acc.name || "Local Coder",
               avatar: acc.avatar || "🧑‍🚀",
-              xp: typeof acc.xp === "number" ? acc.xp : 0,
-              coins: typeof acc.coins === "number" ? acc.coins : 0,
-              badge: acc.unlockedBadges?.includes("solar_badge") ? "👑 Solar Master" : "🚀 CodeNovian",
+              xp: typeof detailed.xp === "number" ? detailed.xp : (typeof acc.xp === "number" ? acc.xp : 0),
+              coins: typeof detailed.coins === "number" ? detailed.coins : (typeof acc.coins === "number" ? acc.coins : 0),
+              badge: (detailed.unlockedBadges || acc.unlockedBadges)?.includes("solar_badge") ? "👑 Solar Master" : "🚀 CodeNovian",
             });
           });
         } catch (e) {
@@ -282,6 +312,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           currentUserInLocal.badge = "👑 Solar Master";
         }
       }
+
+      // Showing real users only for local mode
 
       // Sort descending by coins primarily, and secondarily by xp
       localMembers.sort((a, b) => {
@@ -504,6 +536,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveUserData = async (profile: UserStats) => {
     localStorage.setItem("codenova_user_session", JSON.stringify(profile));
     localStorage.setItem(`codenova_data_${profile.email}`, JSON.stringify(profile));
+
+    // Update in local accounts registry so that other local accounts on this browser can see this updated user in the local leaderboard
+    const accountsKey = "codenova_local_accounts";
+    const accountsStr = localStorage.getItem(accountsKey);
+    let accounts: { [key: string]: any } = {};
+    if (accountsStr) {
+      try {
+        accounts = JSON.parse(accountsStr);
+      } catch (err) {
+        accounts = {};
+      }
+    }
+    const cleanEmail = profile.email.trim().toLowerCase();
+    accounts[cleanEmail] = {
+      ...(accounts[cleanEmail] || {}),
+      name: profile.name,
+      email: cleanEmail,
+      xp: profile.xp,
+      coins: profile.coins,
+      unlockedBadges: profile.unlockedBadges,
+    };
+    localStorage.setItem(accountsKey, JSON.stringify(accounts));
 
     if (isFirebaseActive && db && auth?.currentUser) {
       try {
